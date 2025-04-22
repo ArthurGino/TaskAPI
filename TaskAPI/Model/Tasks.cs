@@ -1,10 +1,10 @@
 ﻿namespace TaskAPI.Model
 {
-    public class Tarefas
+    public class Tasks
     {
         public int Id { get; set; }
         public string Tarefa { get; set; }
-        public bool Status { get; set; }
+        public string Status { get; set; }  
         public DateTime DataTarefa { get; set; }
     }
 }

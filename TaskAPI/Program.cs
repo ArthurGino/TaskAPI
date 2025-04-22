@@ -1,7 +1,9 @@
+using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
-using Npgsql;
+
+using TaskAPI.Context;
 namespace TaskAPI
 {
     public class Program
@@ -10,16 +12,33 @@ namespace TaskAPI
         {
             var builder = WebApplication.CreateBuilder(args);
 
-            // Add services to the container.
+          
 
             builder.Services.AddControllers();
-            // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
+
+            builder.Services.AddDbContext<TaskContext>
+                (options => options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection")));
+
+            builder.Services.AddDbContext<RegisterContext>
+                (options => options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection")));
+
             builder.Services.AddEndpointsApiExplorer();
             builder.Services.AddSwaggerGen();
 
+            builder.Services.AddCors(options =>
+            {
+                options.AddDefaultPolicy(policy =>
+                {
+                    policy.AllowAnyOrigin()
+                          .AllowAnyHeader()
+                          .AllowAnyMethod();
+                });
+            });
+
             var app = builder.Build();
 
-            // Configure the HTTP request pipeline.
+            app.UseCors();
+
             if (app.Environment.IsDevelopment())
             {
                 app.UseSwagger();
@@ -27,6 +46,7 @@ namespace TaskAPI
             }
   
             app.UseHttpsRedirection();
+            
 
             app.UseAuthorization();
 
