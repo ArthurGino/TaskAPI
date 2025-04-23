@@ -17,10 +17,12 @@ namespace TaskAPI.Controllers
 
         [HttpGet]
         [Route("list")]
-        public async Task<IActionResult> listarTarefas()
+        public async Task<IActionResult> listarTarefas(int userId)
         {
-           
-            var lista = await _context.Tasks.ToListAsync();
+            var lista = await _context.Tasks
+               .Where(t => t.UserId == userId)
+               .ToListAsync();
+
             return Ok(lista);
         }
 
@@ -28,6 +30,7 @@ namespace TaskAPI.Controllers
         [Route("insert")]
         public async Task<IActionResult> criarTarefa([FromBody] Tasks tarefa)
         {
+
             _context.Tasks.Add(tarefa);
             await _context.SaveChangesAsync();
             return Ok(tarefa);

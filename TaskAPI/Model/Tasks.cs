@@ -6,5 +6,6 @@
         public string Tarefa { get; set; }
         public string Status { get; set; }  
         public DateTime DataTarefa { get; set; }
+        public int UserId { get; set; } 
     }
 }
