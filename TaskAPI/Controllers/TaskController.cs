@@ -2,9 +2,11 @@
 using TaskAPI.Model;
 using TaskAPI.Context;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.AspNetCore.Authorization;
+using System.Security.Claims;
 
-namespace TaskAPI.Controllers 
-{ 
+namespace TaskAPI.Controllers
+{
     [Route("Task")]
     [ApiController]
     public class TaskController : ControllerBase
@@ -17,8 +19,11 @@ namespace TaskAPI.Controllers
 
         [HttpGet]
         [Route("list")]
-        public async Task<IActionResult> listarTarefas(int userId)
+        [Authorize]
+        public async Task<IActionResult> listarTarefas()
         {
+            var userId = Convert.ToInt32(this.User.FindFirstValue("Id"));
+
             var lista = await _context.Tasks
                .Where(t => t.UserId == userId)
                .ToListAsync();
@@ -28,8 +33,10 @@ namespace TaskAPI.Controllers
 
         [HttpPost]
         [Route("insert")]
+        [Authorize]
         public async Task<IActionResult> criarTarefa([FromBody] Tasks tarefa)
         {
+            tarefa.UserId = Convert.ToInt32(this.User.FindFirstValue("Id"));
 
             _context.Tasks.Add(tarefa);
             await _context.SaveChangesAsync();
@@ -41,11 +48,11 @@ namespace TaskAPI.Controllers
 
         public async Task<IActionResult> editarTarefa(int id, [FromBody] Tasks atualizartarefas)
         {
-            
+
             var tarefas = await _context.Tasks.FindAsync(id);
             if (tarefas == null) return NotFound();
 
-          
+
 
             tarefas.Tarefa = atualizartarefas.Tarefa;
             tarefas.Status = atualizartarefas.Status;
@@ -67,15 +74,5 @@ namespace TaskAPI.Controllers
             return NoContent();
         }
     }
-
-
-
-
-
-
-
-
-
-
 }
 

@@ -6,9 +6,9 @@ using TaskAPI.Model;
 
 namespace TaskAPI
 {
-    public class Authorize
+    public class TokenService
     {
-        public string CreateToken(Register usuario)
+        public static string CreateToken(Register usuario)
         {
 
             List<Claim> claims = new List<Claim>()
@@ -17,23 +17,16 @@ namespace TaskAPI
                 new Claim("Email", usuario.Email.ToString())
             };
 
-            var key = new SymmetricSecurityKey(System.Text.Encoding.UTF8.GetBytes("AppSettings:DefaultConnection"));
+           var key = new SymmetricSecurityKey(System.Text.Encoding.UTF8.GetBytes("hhdfjyrkluço8d.96tutrtfghcygjhfjfjuyjri57zrykrt"));
 
-            var cred = new SigningCredentials(key, SecurityAlgorithms.HmacSha256);
+           var creds = new SigningCredentials(key, SecurityAlgorithms.HmacSha256);
 
-            var token = new JwtSecurityToken(
-               claims: claims,
-               expires: DateTime.Now.AddDays(1),
-               signingCredentials: cred);
+           var token = new JwtSecurityToken
 
+            (claims: claims,
+            expires: DateTime.Now.AddMinutes(30),
+            signingCredentials: creds);
             return new JwtSecurityTokenHandler().WriteToken(token);
-
-
-
-
-
         }
     }
-
-
 }

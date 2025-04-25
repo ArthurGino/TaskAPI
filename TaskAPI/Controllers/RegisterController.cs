@@ -1,19 +1,41 @@
 ﻿using System.Data;
+using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Http.HttpResults;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Data.SqlClient;
 using TaskAPI.Model;
+using System.Security.Claims;
+using Azure;
+
 
 namespace TaskAPI.Controllers
 {
+
     [Route("Singup")]
     [ApiController]
     public class RegisterController : ControllerBase
     {
+
         private readonly IConfiguration _configuration;
         public RegisterController(IConfiguration configuration)
         {
             _configuration = configuration;
         }
+        [Authorize]
+        [HttpGet]
+
+        public ActionResult<Response<string>> GetUsuario()
+        {
+            var user = HttpContext.User;
+            var userId = user.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+            var email = user.FindFirst(ClaimTypes.Email)?.Value;
+            if (userId == null || email == null)
+            {
+                return Unauthorized(new { message = "Usuário não autenticado" });
+            }
+            return Ok(new { Id = userId, Email = email });
+        }
+
         [HttpPost]
         [Route("register")]
         public string registrar(Register cadastro)
@@ -27,7 +49,7 @@ namespace TaskAPI.Controllers
 
             if (userExists > 0)
             {
-                HttpContext.Response.StatusCode = 409; 
+                HttpContext.Response.StatusCode = 409;
                 con.Close();
                 return "Usuário já existe";
             }
@@ -43,7 +65,7 @@ namespace TaskAPI.Controllers
                 return "Usuario cadastrado";
             }
 
-     
+
 
             else
             {
@@ -70,11 +92,12 @@ namespace TaskAPI.Controllers
                         {
                             var user = new Model.Register
                             {
-                                Id = Convert.ToInt32(reader["Id"]), 
+                                Id = Convert.ToInt32(reader["Id"]),
                                 Email = reader["Email"].ToString(),
                                 Password = reader["Password"].ToString(),
                             };
-                            return Ok(new { message = "Logado com sucesso", user = user });
+                            var token = TokenService.CreateToken(user);
+                            return Ok(new { message = "Logado com sucesso", token = token, user = user });
                         }
                         else
                         {
@@ -84,6 +107,7 @@ namespace TaskAPI.Controllers
                 }
             }
         }
+
     }
 }
 
